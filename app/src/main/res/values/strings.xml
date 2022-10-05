@@ -1,0 +1,14 @@
+<resources>
+    <string name="app_name">Notes App</string>
+    <string name="note_title">Add Title</string>
+    <string name="note_location">Add Location</string>
+    <string name="note_audio">Record Audio </string>
+    <string name="note_desc">Add Description</string>
+    <string name="save_note">Save Note</string>
+    <string name="click_picture_icon">Pending</string>
+    <string name="your_note_saver">Your Note Saver</string>
+    <string name="title">Title</string>
+    <string name="secondary_text">Location Parameters</string>
+    <string name="supporting_text">Long Detail Desc</string>
+    <string name="content_description_media">Image File Description</string>
+</resources>
