@@ -9,6 +9,7 @@ import android.location.Address
 import android.location.Geocoder
 import android.location.LocationManager
 import android.media.MediaPlayer
+import android.media.MediaRecorder
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
@@ -33,8 +34,7 @@ import com.ahtezaz.notesapp.db.NoteDatabase
 import com.ahtezaz.notesapp.singleton.NoteConstant.INSERT
 import com.ahtezaz.notesapp.singleton.NoteConstant.SUCCESS
 import com.ahtezaz.notesapp.singleton.NoteConstant.imageCounter
-import com.ahtezaz.notesapp.utils.ImageDialog
-import com.ahtezaz.notesapp.utils.ImageDialogListener
+import com.ahtezaz.notesapp.utils.*
 import com.google.android.gms.location.LocationCallback
 import com.google.android.gms.location.LocationRequest
 import com.google.android.gms.location.LocationResult
@@ -42,6 +42,7 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import java.io.File
+import java.io.IOException
 import java.util.*
 
 
@@ -55,7 +56,8 @@ class NotesActivity : AppCompatActivity() {
     private var userLocation: String? = null
     private var isEnabled = false
     private var audioFilePath: String? = null
-     private var fileUri: Uri? = null
+    private var fileUri: Uri? = null
+    lateinit var rec: MediaRecorder
 
     companion object {
         private const val TAG = "TAG"
@@ -131,7 +133,59 @@ class NotesActivity : AppCompatActivity() {
          * on click get Audio File
          */
         binding.tvAudio.setOnClickListener {
-            getAudioFile.launch("audio/*")
+            AudioDialog(this, object : AudioDialogListener {
+                override fun onAudioFromPhone() {
+                    PhoneAudioRecordDialogue(this@NotesActivity, object : RecorderListener {
+
+                        override fun startRecording() {
+                            val file_path = applicationContext.filesDir.path
+
+                            val file = File(file_path)
+
+                            val date = Date().time
+                            val current_time = Date(java.lang.Long.valueOf(date))
+
+                            rec = MediaRecorder()
+
+                            rec.setAudioSource(MediaRecorder.AudioSource.DEFAULT)
+                            rec.setAudioChannels(1)
+                            rec.setAudioSamplingRate(8000)
+                            rec.setAudioEncodingBitRate(44100)
+                            rec.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
+                            rec.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
+
+                            if (!file.exists()) {
+                                file.mkdirs()
+                            }
+
+                            val file_name = "$file/$current_time.3gp"
+                            rec.setOutputFile(file_name)
+
+                            try {
+                                rec.prepare()
+                            } catch (e: IOException) {
+                                e.printStackTrace()
+                                Toast.makeText(this@NotesActivity,
+                                    "Sorry! file creation failed!" + e.message,
+                                    Toast.LENGTH_SHORT).show()
+                                return
+                            }
+                            rec.start()
+                            showSnackbar("$file_path  $file_name")
+                        }
+
+                        override fun stopRecording() {
+                            rec.stop()
+
+                        }
+
+                    }).show()
+                }
+
+                override fun onAudioRecorder() {
+                    getAudioFile.launch("audio/*")
+                }
+            })
         }
         /**
          * on click listener for save note
@@ -146,6 +200,7 @@ class NotesActivity : AppCompatActivity() {
 //            }
         }
     }
+
 
     private fun createImageUri(): Uri? {
         ++imageCounter
@@ -322,19 +377,19 @@ class NotesActivity : AppCompatActivity() {
 
 
     private fun isExternalStorageDocument(uri: Uri): Boolean {
-        return "com.android.externalstorage.documents" == uri.getAuthority()
+        return "com.android.externalstorage.documents" == uri.authority
     }
 
     private fun isDownloadsDocument(uri: Uri): Boolean {
-        return "com.android.providers.downloads.documents" == uri.getAuthority()
+        return "com.android.providers.downloads.documents" == uri.authority
     }
 
     private fun isMediaDocument(uri: Uri): Boolean {
-        return "com.android.providers.media.documents" == uri.getAuthority()
+        return "com.android.providers.media.documents" == uri.authority
     }
 
     private fun isGooglePhotosUri(uri: Uri): Boolean {
-        return "com.google.android.apps.photos.content" == uri.getAuthority()
+        return "com.google.android.apps.photos.content" == uri.authority
     }
 
 }
