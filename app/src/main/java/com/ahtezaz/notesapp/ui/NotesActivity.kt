@@ -42,7 +42,6 @@ import com.google.android.gms.location.LocationServices
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
 import java.io.File
-import java.io.IOException
 import java.util.*
 
 
@@ -57,8 +56,9 @@ class NotesActivity : AppCompatActivity() {
     private var isEnabled = false
     private var audioFilePath: String? = null
     private var fileUri: Uri? = null
-    lateinit var rec: MediaRecorder
-
+    lateinit var mediaRecorder: MediaRecorder
+    private var internalDirectoryPath = ""
+    private var audio = "audio"
     companion object {
         private const val TAG = "TAG"
 
@@ -115,6 +115,7 @@ class NotesActivity : AppCompatActivity() {
                 override fun onCameraButtonClick() {
                     fileUri = createImageUri()
                     takeImageResult.launch(fileUri)
+
                 }
 
                 override fun onGalleryButtonClick() {
@@ -138,44 +139,14 @@ class NotesActivity : AppCompatActivity() {
                     PhoneAudioRecordDialogue(this@NotesActivity, object : RecorderListener {
 
                         override fun startRecording() {
-                            val file_path = applicationContext.filesDir.path
+                            internalDirectoryPath = applicationContext.filesDir.absolutePath
+                            showSnackbar(internalDirectoryPath)
+                            mediaRecorder = MediaRecorder()
 
-                            val file = File(file_path)
 
-                            val date = Date().time
-                            val current_time = Date(java.lang.Long.valueOf(date))
-
-                            rec = MediaRecorder()
-
-                            rec.setAudioSource(MediaRecorder.AudioSource.DEFAULT)
-                            rec.setAudioChannels(1)
-                            rec.setAudioSamplingRate(8000)
-                            rec.setAudioEncodingBitRate(44100)
-                            rec.setOutputFormat(MediaRecorder.OutputFormat.THREE_GPP)
-                            rec.setAudioEncoder(MediaRecorder.AudioEncoder.AMR_NB)
-
-                            if (!file.exists()) {
-                                file.mkdirs()
-                            }
-
-                            val file_name = "$file/$current_time.3gp"
-                            rec.setOutputFile(file_name)
-
-                            try {
-                                rec.prepare()
-                            } catch (e: IOException) {
-                                e.printStackTrace()
-                                Toast.makeText(this@NotesActivity,
-                                    "Sorry! file creation failed!" + e.message,
-                                    Toast.LENGTH_SHORT).show()
-                                return
-                            }
-                            rec.start()
-                            showSnackbar("$file_path  $file_name")
                         }
 
                         override fun stopRecording() {
-                            rec.stop()
 
                         }
 
@@ -185,7 +156,7 @@ class NotesActivity : AppCompatActivity() {
                 override fun onAudioRecorder() {
                     getAudioFile.launch("audio/*")
                 }
-            })
+            }).show()
         }
         /**
          * on click listener for save note

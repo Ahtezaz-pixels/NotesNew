@@ -8,7 +8,7 @@ import com.ahtezaz.notesapp.databinding.PhoneAudioRecorderBinding
 
 class PhoneAudioRecordDialogue(context: Context, var recorder: RecorderListener) :
     AppCompatDialog(context) {
-    var time = 30
+    var time = 1
     lateinit var binding: PhoneAudioRecorderBinding
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,10 +33,10 @@ class PhoneAudioRecordDialogue(context: Context, var recorder: RecorderListener)
         }
     }
 
-   private fun timer() = object : CountDownTimer(30000, 1000) {
+   private fun timer() = object : CountDownTimer(300000, 1000) {
         override fun onTick(millisUntilFinished: Long) {
             binding.timer.text = "0:" + checkDigit(time)
-            time--
+            time++
         }
 
         override fun onFinish() {
