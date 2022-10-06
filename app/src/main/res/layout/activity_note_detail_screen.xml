@@ -4,8 +4,8 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.NoteDetailScreen"
-    android:padding="16sp">
+    android:padding="16sp"
+    tools:context=".ui.NoteDetailScreen">
 
     <com.google.android.material.card.MaterialCardView
         android:id="@+id/card"
@@ -30,7 +30,7 @@
                 android:layout_width="match_parent"
                 android:layout_height="194dp"
                 android:contentDescription="@string/content_description_media"
-                    android:scaleType="centerCrop"
+                android:scaleType="centerCrop"
                 app:srcCompat="@drawable/check" />
 
             <LinearLayout
@@ -75,12 +75,22 @@
                 android:orientation="horizontal">
 
                 <com.google.android.material.button.MaterialButton
-                    android:id="@+id/deletetNote"
+                    android:id="@+id/playAudio"
                     style="?attr/borderlessButtonStyle"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:layout_marginEnd="8dp"
-                    android:text="Delete Note"
+                    android:text="Play Audio"
+                    android:textAllCaps="false"
+                    android:textStyle="italic|bold" />
+
+                <com.google.android.material.button.MaterialButton
+                    android:id="@+id/StopAudio"
+                    style="?attr/borderlessButtonStyle"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:layout_marginEnd="8dp"
+                    android:text="Stop Audio"
                     android:textAllCaps="false"
                     android:textStyle="italic|bold" />
 
@@ -89,4 +99,18 @@
         </LinearLayout>
 
     </com.google.android.material.card.MaterialCardView>
+
+    <com.google.android.gms.ads.AdView
+        android:id="@+id/adView"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_alignParentBottom="true"
+        android:layout_centerHorizontal="true"
+        android:layout_marginTop="10dp"
+        app:adSize="MEDIUM_RECTANGLE"
+        app:adUnitId="ca-app-pub-3940256099942544/6300978111"
+        app:layout_constraintEnd_toEndOf="parent"
+        app:layout_constraintStart_toStartOf="parent"
+        app:layout_constraintTop_toBottomOf="@+id/card" />
+
 </androidx.constraintlayout.widget.ConstraintLayout>

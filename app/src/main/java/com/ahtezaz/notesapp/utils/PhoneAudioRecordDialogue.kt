@@ -20,6 +20,7 @@ class PhoneAudioRecordDialogue(context: Context, var recorder: RecorderListener)
 
             recorder.startRecording()
             timer().start()
+            binding.stop.isEnabled = true
 
         }
 
@@ -33,7 +34,7 @@ class PhoneAudioRecordDialogue(context: Context, var recorder: RecorderListener)
         }
     }
 
-   private fun timer() = object : CountDownTimer(300000, 1000) {
+    private fun timer() = object : CountDownTimer(300000, 1000) {
         override fun onTick(millisUntilFinished: Long) {
             binding.timer.text = "0:" + checkDigit(time)
             time++
@@ -44,7 +45,7 @@ class PhoneAudioRecordDialogue(context: Context, var recorder: RecorderListener)
         }
     }
 
-  private  fun checkDigit(number: Int): String? {
+    private fun checkDigit(number: Int): String? {
         return if (number <= 9) "0$number" else number.toString()
     }
 

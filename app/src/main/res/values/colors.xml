@@ -10,5 +10,6 @@
     <color name="bg_green">#38c172</color>
     <color name="color_note">#58D509</color>
     <color name="red">#9A1E15</color>
-    <color name="grey">#BAB7B7</color>
+    <color name="colorCard">#F8D8D5</color>
+    <color name="grey">#EDBEBE</color>
 </resources>
