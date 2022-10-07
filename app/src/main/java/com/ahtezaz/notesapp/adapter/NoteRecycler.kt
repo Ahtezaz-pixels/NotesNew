@@ -2,6 +2,7 @@ package com.ahtezaz.notesapp.adapter
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -37,37 +38,54 @@ class NoteRecycler(
         val note = noteItems[position]
         holder.binding.noteTitle.text = note.title
         holder.binding.noteLocation.text = note.location
+
+        holder.binding.card.setBackgroundColor(ContextCompat.getColor(context,
+            com.ahtezaz.notesapp.R.color.white))
+
         /**
          * shows notes details on click
          */
         holder.itemView.setOnClickListener {
-            NoteSingleton.note = noteItems[position]
-            context.startActivity(Intent(context, NoteDetailScreen::class.java))
+            if (listOfNoteToDelete.isEmpty()) {
+                NoteSingleton.note = noteItems[position]
+                context.startActivity(Intent(context, NoteDetailScreen::class.java))
+                Log.d(TAG, "onCreate: Single Click Run")
+            } else {
+                onClickHandlerForMultipleDelete(holder)
+            }
         }
+
         /**
          * show details for long click listener
          */
 
-
+        Log.d(TAG, "onCreate: On Bind Run")
         holder.itemView.setOnLongClickListener {
-            holder.binding.card.setBackgroundColor(ContextCompat.getColor(context,
-                com.ahtezaz.notesapp.R.color.colorCard))
-            if (listOfNoteToDelete.contains(noteItems[holder.adapterPosition])) {
-                holder.binding.card.setBackgroundColor(ContextCompat.getColor(context,
-                    com.ahtezaz.notesapp.R.color.white))
-                listOfNoteToDelete.remove(noteItems[holder.adapterPosition])
-            } else {
-                listOfNoteToDelete.add(noteItems[holder.adapterPosition])
-            }
-            if (listOfNoteToDelete.isEmpty()) {
-                deleteListOfItem.visibility = View.GONE
-            } else {
-                deleteListOfItem.visibility = View.VISIBLE
-
-            }
+            onClickHandlerForMultipleDelete(holder)
             true
         }
 
+
+    }
+
+    private fun onClickHandlerForMultipleDelete(holder: NoteViewHolder) {
+        Log.d(TAG, "onCreate: Run After Delete")
+        holder.binding.card.setBackgroundColor(ContextCompat.getColor(context,
+            com.ahtezaz.notesapp.R.color.white))
+        if (listOfNoteToDelete.contains(noteItems[holder.adapterPosition])) {
+            holder.binding.card.setBackgroundColor(ContextCompat.getColor(context,
+                com.ahtezaz.notesapp.R.color.white))
+            listOfNoteToDelete.remove(noteItems[holder.adapterPosition])
+        } else {
+            holder.binding.card.setBackgroundColor(ContextCompat.getColor(context,
+                com.ahtezaz.notesapp.R.color.colorCard))
+            listOfNoteToDelete.add(noteItems[holder.adapterPosition])
+        }
+        if (listOfNoteToDelete.isEmpty()) {
+            deleteListOfItem.visibility = View.GONE
+        } else {
+            deleteListOfItem.visibility = View.VISIBLE
+        }
 
     }
 

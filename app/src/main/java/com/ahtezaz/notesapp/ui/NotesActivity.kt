@@ -43,6 +43,9 @@ import com.google.android.gms.location.LocationResult
 import com.google.android.gms.location.LocationServices
 import com.google.android.material.snackbar.Snackbar
 import com.google.android.material.textfield.TextInputLayout
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 import java.io.File
 import java.io.IOException
 import java.util.*
@@ -149,6 +152,8 @@ class NotesActivity : AppCompatActivity() {
                 Log.d(TAG, "CIDKASJKJASDAKSJD: $NOTE_ID_COUNTER")
                 viewModel.insertNote(addNote)
                 showSnackbarGreen("Note Inserted Successfully")
+                binding.tvInsert.text = "Pending"
+                binding.tvInsert.setTextColor(ContextCompat.getColor(this, R.color.red))
                 setValuesToNull()
             }
 
@@ -258,6 +263,8 @@ class NotesActivity : AppCompatActivity() {
                 binding.imUpload.setImageURI(fileUri)
                 showSnackbar(fileUri.toString())
                 imageFilePath = fileUri?.toString()
+                binding.tvInsert.text = SUCCESS
+                binding.tvInsert.setTextColor(ContextCompat.getColor(this, R.color.bg_green))
                 showSnackbar(imageFilePath!!)
             } else {
                 showSnackbar("Capture Image")
@@ -266,40 +273,43 @@ class NotesActivity : AppCompatActivity() {
 
 
     private fun getCurrentLocation() {
-        locationRequest = LocationRequest.create()
-        if (isGPSEnabled()) {
-            if (ActivityCompat.checkSelfPermission(this,
-                    Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
-                    this,
-                    Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
-            ) {
-                LocationServices.getFusedLocationProviderClient(this@NotesActivity)
-                    .requestLocationUpdates(locationRequest!!, object : LocationCallback() {
-                        override fun onLocationResult(locationResult: LocationResult) {
-                            super.onLocationResult(locationResult)
-                            LocationServices.getFusedLocationProviderClient(this@NotesActivity)
-                                .removeLocationUpdates(this)
-                            if (locationResult.locations.size > 0) {
-                                val index = locationResult.locations.size - 1
-                                val latitude = locationResult.locations[index].latitude
-                                val longitude = locationResult.locations[index].longitude
-                                val geocoder = Geocoder(this@NotesActivity, Locale.getDefault())
-                                val addresses: List<Address> =
-                                    geocoder.getFromLocation(latitude, longitude, 1)
-                                val cityName: String = addresses[0].getAddressLine(0)
-                                binding.tvLocation.text = cityName
-                                userLocation = cityName
+        CoroutineScope(Dispatchers.Main).launch {
+            locationRequest = LocationRequest.create()
+            if (isGPSEnabled()) {
+                if (ActivityCompat.checkSelfPermission(this@NotesActivity,
+                        Manifest.permission.ACCESS_FINE_LOCATION) == PackageManager.PERMISSION_GRANTED && ActivityCompat.checkSelfPermission(
+                        this@NotesActivity,
+                        Manifest.permission.ACCESS_COARSE_LOCATION) == PackageManager.PERMISSION_GRANTED
+                ) {
+                    LocationServices.getFusedLocationProviderClient(this@NotesActivity)
+                        .requestLocationUpdates(locationRequest!!, object : LocationCallback() {
+                            override fun onLocationResult(locationResult: LocationResult) {
+                                super.onLocationResult(locationResult)
+                                LocationServices.getFusedLocationProviderClient(this@NotesActivity)
+                                    .removeLocationUpdates(this)
+                                if (locationResult.locations.size > 0) {
+                                    val index = locationResult.locations.size - 1
+                                    val latitude = locationResult.locations[index].latitude
+                                    val longitude = locationResult.locations[index].longitude
+                                    val geocoder = Geocoder(this@NotesActivity, Locale.getDefault())
+                                    val addresses: List<Address> =
+                                        geocoder.getFromLocation(latitude, longitude, 1)
+                                    val cityName: String = addresses[0].getAddressLine(0)
+                                    binding.tvLocation.text = cityName
+                                    userLocation = cityName
+                                }
                             }
-                        }
-                    }, Looper.getMainLooper())
+                        }, Looper.getMainLooper())
+                } else {
+                    showSnackbar("Location Permission Required")
+                    userLocation = null
+                }
             } else {
-                showSnackbar("Location Permission Required")
+                showSnackbar("Turn On GPS")
                 userLocation = null
             }
-        } else {
-            showSnackbar("Turn On GPS")
-            userLocation = null
         }
+
     }
 
     private fun showSnackbar(message: String) {

@@ -1,7 +1,6 @@
 package com.ahtezaz.notesapp.ui
 
 import android.Manifest
-import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Bundle
@@ -12,7 +11,6 @@ import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.app.ActivityCompat
 import androidx.lifecycle.ViewModelProvider
-import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
 import com.ahtezaz.mvvmnoting.repository.NoteRepository
 import com.ahtezaz.mvvmnoting.ui.note_viewmodel.NoteViewModel
@@ -23,7 +21,6 @@ import com.ahtezaz.notesapp.db.NoteDatabase
 import com.ahtezaz.notesapp.db.model.Note
 import com.google.android.gms.ads.AdRequest
 import com.google.android.gms.ads.MobileAds
-import kotlinx.coroutines.launch
 
 
 class NotesListActivity : AppCompatActivity() {
@@ -33,14 +30,16 @@ class NotesListActivity : AppCompatActivity() {
     var searchList: MutableList<Note> = mutableListOf()
     lateinit var adRequest: AdRequest
 
-    @SuppressLint("NotifyDataSetChanged")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         binding = ActivityNotesListBinding.inflate(layoutInflater)
         setContentView(binding.root)
 
-        MobileAds.initialize(this
-        ) { Toast.makeText(this@NotesListActivity, " successful ", Toast.LENGTH_SHORT).show(); }
+        MobileAds.initialize(this) {
+            Toast.makeText(this@NotesListActivity,
+                " successful ",
+                Toast.LENGTH_SHORT).show();
+        }
 
         adRequest = AdRequest.Builder().build()
 
@@ -57,28 +56,46 @@ class NotesListActivity : AppCompatActivity() {
         noteAdapter = NoteRecycler(this, listOf(), viewModel, binding.deleteListOfItem)
         binding.rvNotesItem.layoutManager = LinearLayoutManager(this)
         binding.rvNotesItem.adapter = noteAdapter
+        /**
+         *
+         *add note click listener
+         */
         registerAddNoteClickListener()
+
+        /**
+         *
+         * fetch note from room and update recycler view
+         */
         viewModel.getListOfNote().observe(this) {
             if (it.isNotEmpty()) {
                 noteAdapter.noteItems = it
                 searchList.addAll(it)
-
+                Log.d("TAG", "onCreate: Observer has run ")
                 noteAdapter.notifyDataSetChanged()
+
+                Log.d("TAG", "onCreate: Observer has run :${noteAdapter.listOfNoteToDelete.size}")
             } else {
                 noteAdapter.noteItems = listOf()
                 noteAdapter.notifyDataSetChanged()
             }
         }
-
+        /**
+         * delete multiple items from notes at once
+         */
         binding.deleteListOfItem.setOnClickListener {
-            lifecycleScope.launch {
-                for (item in noteAdapter.listOfNoteToDelete) {
-                    viewModel.deleteNote(item)
-                }
-            }
             binding.deleteListOfItem.visibility = View.GONE
+            Log.d("TAG",
+                "onCreate: Run Before noteAdapter.listOfNoteToDelete. :${noteAdapter.listOfNoteToDelete.size}")
+            for (item in noteAdapter.listOfNoteToDelete) viewModel.deleteNote(item)
+            noteAdapter.listOfNoteToDelete = mutableListOf()
+            Log.d("TAG",
+                "onCreate: Run After noteAdapter.listOfNoteToDelete.l :${noteAdapter.listOfNoteToDelete.size}")
+
 
         }
+        /**
+         * search note in recycler view
+         */
         binding.searchNotes.setOnQueryTextListener(object : SearchView.OnQueryTextListener {
             override fun onQueryTextSubmit(query: String?): Boolean {
                 Log.d("TAG", "onQueryTextSubmit:Search Size ${searchList.size} :: Query = {$query}")
@@ -87,8 +104,8 @@ class NotesListActivity : AppCompatActivity() {
                 }
                 Log.d("TAG", "onQueryTextSubmit:List Filter ${list.size} , ::::: Query = {$query}")
                 noteAdapter.noteItems = list
-                Toast.makeText(this@NotesListActivity, "${list.size}", Toast.LENGTH_SHORT).show()
                 noteAdapter.notifyDataSetChanged()
+                Toast.makeText(this@NotesListActivity, "${list.size}", Toast.LENGTH_SHORT).show()
                 Log.d("TAG", "onQueryTextSubmit:Search Size ${searchList.size} :: Query = {$query}")
                 return true
             }

@@ -45,6 +45,7 @@ class NoteDetailScreen : AppCompatActivity() {
         }
         binding.StopAudio.setOnClickListener {
             mediaPlayer.stop()
+            mediaPlayer.release()
             mediaPlayer.reset()
         }
 
@@ -56,5 +57,12 @@ class NoteDetailScreen : AppCompatActivity() {
         mediaPlayer.start()
     }
 
+    override fun onBackPressed() {
+        super.onBackPressed()
+        mediaPlayer.stop()
+        mediaPlayer.release()
+        binding.StopAudio.isEnabled = false
+
+    }
 
 }
